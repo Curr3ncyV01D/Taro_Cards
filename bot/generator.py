@@ -175,7 +175,7 @@ class TarotAI:
 
         # Проверка на минимальное количество уникальных слов
         unique_words = set(words)
-        if len(unique_words) < 2 and len(words) >= 3:
+        if len(unique_words) < 2:
             return {
                 "valid": False,
                 "message": "Пожалуйста, задайте более осмысленный вопрос."
