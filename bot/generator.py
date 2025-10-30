@@ -3,7 +3,6 @@ import time
 import random
 import hashlib
 import re
-from collections import Counter
 
 from openai import AsyncOpenAI, APIError, RateLimitError
 
@@ -159,11 +158,16 @@ class TarotAI:
                 }
 
         # Проверка на слишком много одинаковых слов
-        words = re.findall(r'\b\w+\b', question_lower)
+        words = question_lower.split()
         if len(words) > 3:
-            word_counts = Counter(words)
-            most_common_count = word_counts.most_common(1)[0][1]
-            if most_common_count > len(words) * 0.5:  # если одно слово занимает >50%
+            # Проверяем, есть ли много повторяющихся слов
+            word_counts = {}
+            for word in words:
+                word_counts[word] = word_counts.get(word, 0) + 1
+
+            # Если какое-то слово встречается слишком часто
+            max_count = max(word_counts.values())
+            if max_count > len(words) * 0.5:  # если одно слово занимает >50%
                 return {
                     "valid": False,
                     "message": "Пожалуйста, сформулируйте вопрос более разнообразно."
@@ -182,18 +186,23 @@ class TarotAI:
     def _clean_question(self, question: str) -> str:
         """Очищает и валидирует вопрос"""
         question = question.strip()
-        # Удаляем лишние пробелы
-        question = re.sub(r'\s+', ' ', question)
+        # Удаляем лишние пробелы - просто цикл на наличие 2 пробелов в тексте
+        while '  ' in question:
+            question = question.replace('  ', ' ')
         return question[:500]
 
     def _is_rejected_response(self, response: str) -> bool:
         """Проверяет, является ли ответ отказом от ИИ"""
+        if not response:
+            return True
+
         rejection_phrases = [
             "не могу сделать расклад",
             "не могу ответить",
             "не подходит для таро",
             "отказаться",
-            "не могу помочь"
+            "не могу помочь",
+            "к сожалению"
         ]
         response_lower = response.lower()
         return any(phrase in response_lower for phrase in rejection_phrases)
@@ -217,6 +226,7 @@ class TarotAI:
         return f"🔮 {card['name']}\n📖 {card['meaning']}\n💫 Прислушайтесь к знакам судьбы сегодня."
 
 
+# Использование
 tarot_ai = TarotAI()
 
 

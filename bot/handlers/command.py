@@ -27,7 +27,6 @@ async def delete_messages_up_to(callback: CallbackQuery, bot: Bot):
     chat_id = callback.message.chat.id
     current_message_id = callback.message.message_id
 
-    # Проверяем, что target_message_id <= current_message_id
     if target_message_id > current_message_id:
         await callback.answer("Некорректный диапазон удаления")
         return
@@ -45,10 +44,10 @@ async def delete_messages_up_to(callback: CallbackQuery, bot: Bot):
 
 @router.message(Command('start'))
 async def start(message: Message, state: FSMContext):
-    await message.answer('Здравствуйте, тут можно получить раскладик таро онлайн бесплатно.\n'
+    await message.answer('Здравствуйте, тут можно получить расклад таро бесплатно.\n'
                          '\n'
                          'Чтобы сделать расклад опиши свою ситуацию и я обращусь к высшим силам за помощью тебе!')
-    await state.update_data(message_id=message.message_id + 1)
+    await state.update_data(message_id=message.message_id)
     await state.set_state(FsmReading.get_context)
 
 
@@ -70,13 +69,10 @@ async def send_reading(message: Message, state: FSMContext):
     except Exception as e:
         print(f"Произошла ошибка: {e}")
     # Разделяем ответ ИИ на части по разделителю '~!'
-
-    print(response_ai)
-
     response_ai = response_ai.split('~!')  # Ожидается, что будет 4 части: по одной на каждую карту + итог
 
     if len(response_ai) < 4:
-        await message.answer(response_ai[0])
+        await message.answer(response_ai[0], reply_markup=send_reading_kb(data['message_id']))
         return None
 
     for i in range(0, 3):
@@ -86,7 +82,7 @@ async def send_reading(message: Message, state: FSMContext):
     await message.answer(f'{response_ai[3]}')
 
     await message.answer('Это всё, что мне сказали карты.\n'
-                         'Если хочешь ещё один расклад, закрой этот и начни новый раскладик!',
+                         'Если хочешь ещё один расклад, закрой этот и начни новый расклад!',
                          # Добавляем кнопку для удаления сообщений расклада
                          reply_markup=send_reading_kb(data['message_id']))
 
