@@ -3,7 +3,7 @@ import string
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
+# noinspection PyUnresolvedReferences
 from database.models import User
 
 

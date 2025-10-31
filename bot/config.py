@@ -8,8 +8,9 @@ load_dotenv()
 class BotConfig:
     """
     Конфигурация бота.
-    Загружает токен из переменных окружения.
+    Загружает данные из переменных окружения.
     """
+    name_bot: str = os.getenv('BOT_NAME', '')
     token_bot: str = os.getenv("BOT_TOKEN", "")
     token_api: str = os.getenv('API_TOKEN', '')
 

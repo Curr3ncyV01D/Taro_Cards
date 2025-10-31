@@ -1,47 +1,26 @@
 from asyncio import sleep
 
-from aiogram import Router, F, Bot
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 
+# noinspection PyUnresolvedReferences
+from config import config
+# noinspection PyUnresolvedReferences
 from generator import create_response, create_spread, card_to_sticker
+# noinspection PyUnresolvedReferences
+from database.requests import set_user, get_count_requests_user, set_count_requests_user, get_referral_code_user
 
-from database.requests import set_user
+# noinspection PyUnresolvedReferences
+from handlers.utils import universal_close_message_kb
 
 router = Router()
 
 
 class FsmReading(StatesGroup):
     get_context = State()
-
-
-@router.callback_query(F.data.startswith('delete_up_to_'))
-async def delete_messages_up_to(callback: CallbackQuery, bot: Bot):
-    # Извлекаем target_message_id из callback данных
-    try:
-        target_message_id = int(callback.data.split('_')[-1])
-    except (IndexError, ValueError):
-        await callback.answer("Ошибка в формате данных")
-        return
-
-    chat_id = callback.message.chat.id
-    current_message_id = callback.message.message_id
-
-    if target_message_id > current_message_id:
-        await callback.answer("Некорректный диапазон удаления")
-        return
-
-    # Генерируем список всех message_id от target_message_id до current_message_id включительно
-    all_message_ids = list(range(target_message_id, current_message_id + 1))
-    for message_id in all_message_ids:
-        try:
-            await bot.delete_message(chat_id=chat_id, message_id=message_id)
-        except Exception as e:
-            print(f"Не удалось удалить сообщение: {message_id}: {e}")
-
-    await callback.answer("Сообщения удалены")
 
 
 @router.message(Command('start'))
@@ -56,10 +35,18 @@ async def start(message: Message, state: FSMContext):
 
 @router.message(FsmReading.get_context)
 async def send_reading(message: Message, state: FSMContext):
+    user_tg_id = message.from_user.id
     data = await state.get_data()
     await state.clear()
 
     await message.answer('Отлично, я получила твою ситуацию, уже связываюсь с высшими силами, чтобы помочь тебе!')
+
+    user_count_requests = await get_count_requests_user(user_tg_id)
+    if user_count_requests <= 0:  # Если нет доступных запросов
+        await message.answer('❌ У вас нету доступных запросов! ❌\n\n'
+                             'Чтобы получить дополнительные запросы приведите друзей к нам!\n',
+                             reply_markup=not_enough_requests_kb(data['message_id']))
+        return None
 
     spread = await create_spread()
     gifs = []  # Список для хранения GIF-анимаций карт
@@ -74,9 +61,12 @@ async def send_reading(message: Message, state: FSMContext):
     # Разделяем ответ ИИ на части по разделителю '~!'
     response_ai = response_ai.split('~!')  # Ожидается, что будет 4 части: по одной на каждую карту + итог
 
-    if len(response_ai) < 4:
+    if len(response_ai) < 4:  # Если частей ответа меньше, чем ожидается, отправляем сообщение об ошибке
         await message.answer(response_ai[0], reply_markup=send_reading_kb(data['message_id']))
         return None
+
+    user_count_requests -= 1
+    await set_count_requests_user(user_tg_id, user_count_requests)  # Запись в бд, использования одного запроса
 
     for i in range(0, 3):
         await message.answer_sticker(sticker=f'{gifs[i]}')
@@ -90,6 +80,24 @@ async def send_reading(message: Message, state: FSMContext):
                          reply_markup=send_reading_kb(data['message_id']))
 
 
+def not_enough_requests_kb(message_id) -> InlineKeyboardMarkup:
+    buttons = [[InlineKeyboardButton(text='Получить реферальную ссылку 💌', callback_data=f'user_referral_link')],
+               [InlineKeyboardButton(text='Скрыть этот расклад 👁', callback_data=f'delete_up_to_{message_id}')]]
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
 def send_reading_kb(message_id) -> InlineKeyboardMarkup:
     buttons = [[InlineKeyboardButton(text='Скрыть этот расклад 👁', callback_data=f'delete_up_to_{message_id}')]]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+@router.callback_query(F.data == 'user_referral_link')
+async def user_referral_link(callback: CallbackQuery):
+    referral_code = await get_referral_code_user(callback.from_user.id)
+    referral_link = f'https://t.me/{config.name_bot}?start={referral_code}'
+    await callback.answer()
+    await callback.message.answer('Вот ваша реферальная ссылка!\n'
+                                  f'💌   <code>{referral_link}</code>   💌\n'
+                                  '🔮 Скорее поделитесь ею с друзьями, чтобы получить бонусные запросы к нашим магам!',
+                                  reply_markup=universal_close_message_kb('🔙 Назад'),
+                                  parse_mode='HTML')

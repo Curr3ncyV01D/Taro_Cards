@@ -1,7 +1,10 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 
+# noinspection PyUnresolvedReferences
 from database.db_function import generate_unique_referral_code
+# noinspection PyUnresolvedReferences
 from database.models import async_session, User
+from sqlalchemy.util import await_only
 
 
 async def set_user(user_data) -> None:
@@ -21,3 +24,20 @@ async def set_user(user_data) -> None:
                     referral_code=referral_code
                 )
                 session.add(new_user)
+
+
+async def get_count_requests_user(tg_id):
+    """Возвращает количество доступных запросов по айди пользователя"""
+    async with async_session() as session:
+        return await session.scalar(select(User.requests).where(User.tg_id == tg_id))
+
+
+async def set_count_requests_user(tg_id, requests_count):
+    """Изменяет количество доступных запросов по айди пользователя"""
+    async with async_session() as session:
+        await session.execute(update(User).where(User.tg_id == tg_id).values(requests=requests_count))
+
+
+async def get_referral_code_user(tg_id):
+    async with async_session() as session:
+        return await session.scalar(select(User.referral_code).where(User.tg_id == tg_id))
