@@ -2,6 +2,7 @@ import asyncio
 import logging
 from aiogram import Bot, Dispatcher
 
+from database.models import async_main, engine
 from config import config
 from handlers import routers
 
@@ -19,6 +20,8 @@ async def main():
         logger.error("Не найден BOT_TOKEN в переменных окружения")
         return
 
+    await async_main()
+
     bot = Bot(token=config.token_bot)
     dp = Dispatcher()
 
@@ -30,6 +33,7 @@ async def main():
         await dp.start_polling(bot)
     finally:
         await bot.session.close()
+        await engine.dispose()
 
 
 if __name__ == "__main__":

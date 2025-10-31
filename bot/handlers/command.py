@@ -8,6 +8,8 @@ from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKe
 
 from generator import create_response, create_spread, card_to_sticker
 
+from database.requests import set_user
+
 router = Router()
 
 
@@ -44,6 +46,7 @@ async def delete_messages_up_to(callback: CallbackQuery, bot: Bot):
 
 @router.message(Command('start'))
 async def start(message: Message, state: FSMContext):
+    await set_user(user_data=message.from_user)
     await message.answer('Здравствуйте, тут можно получить расклад таро бесплатно.\n'
                          '\n'
                          'Чтобы сделать расклад опиши свою ситуацию и я обращусь к высшим силам за помощью тебе!')
