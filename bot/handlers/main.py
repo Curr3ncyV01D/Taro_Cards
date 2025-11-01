@@ -11,10 +11,10 @@ from config import config
 # noinspection PyUnresolvedReferences
 from generator import create_response, create_spread, card_to_sticker
 # noinspection PyUnresolvedReferences
-from database.requests import set_user, get_count_requests_user, set_count_requests_user, get_referral_code_user
-
+from database.requests import set_user, get_count_requests_user, set_count_requests_user, get_referral_code_user, \
+    get_referral_id_user
 # noinspection PyUnresolvedReferences
-from handlers.utils import universal_close_message_kb
+from handlers.utils import universal_close_message_kb, process_referrer
 
 router = Router()
 
@@ -25,7 +25,13 @@ class FsmReading(StatesGroup):
 
 @router.message(Command('start'))
 async def start(message: Message, state: FSMContext):
-    await set_user(user_data=message.from_user)
+    referrer_id = None
+    # Извлекаем код из команды, если таковой есть
+    if len(message.text.split()) > 1:
+        referrer_code = message.text.split()[1]  # код после /start
+        referrer_id = await process_referrer(referrer_code)
+
+    await set_user(user_data=message.from_user, referrer_id=referrer_id)
     await message.answer('Здравствуйте, тут можно получить расклад таро бесплатно.\n'
                          '\n'
                          'Чтобы сделать расклад опиши свою ситуацию и я обращусь к высшим силам за помощью тебе!')

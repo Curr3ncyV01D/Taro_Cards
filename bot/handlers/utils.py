@@ -1,5 +1,8 @@
 from aiogram import Bot, F, Router
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+# noinspection PyUnresolvedReferences
+from database.requests import (get_referral_id_user, get_count_referral_user, set_count_referral_user,
+                               get_count_requests_user, set_count_requests_user)
 
 router = Router()
 
@@ -40,3 +43,14 @@ async def close_message(callback: CallbackQuery):
 def universal_close_message_kb(text) -> InlineKeyboardMarkup:
     buttons = [[InlineKeyboardButton(text=f'{text}', callback_data=f'close_message')]]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+async def process_referrer(referrer_code):
+    referrer_id = await get_referral_id_user(referrer_code)  # айди владельца реферального кода
+    # обновляем счетчик реферу, засчитывая нового реферала
+    referral_count = await get_count_referral_user(referrer_id)
+    await set_count_referral_user(referrer_id, referral_count + 1)
+    # добавляем бонус(5 новых запросов) реферу за нового реферала
+    user_count_requests = await get_count_requests_user(referrer_id)
+    await set_count_requests_user(referrer_id, user_count_requests + 5)
+    return referrer_id
