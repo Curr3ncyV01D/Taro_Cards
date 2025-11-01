@@ -87,7 +87,8 @@ async def send_reading(message: Message, state: FSMContext):
 
 
 def not_enough_requests_kb(message_id) -> InlineKeyboardMarkup:
-    buttons = [[InlineKeyboardButton(text='Получить реферальную ссылку 💌', callback_data=f'user_referral_link_{message_id}')]]
+    buttons = [
+        [InlineKeyboardButton(text='Получить реферальную ссылку 💌', callback_data=f'user_referral_link_{message_id}')]]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
