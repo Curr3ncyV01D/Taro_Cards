@@ -45,14 +45,14 @@ async def send_reading(message: Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
 
-    await message.answer('Отлично, я получила твою ситуацию, уже связываюсь с высшими силами, чтобы помочь тебе!')
-
     user_count_requests = await get_count_requests_user(user_tg_id)
     if user_count_requests <= 0:  # Если нет доступных запросов
-        await message.answer('❌ У вас нету доступных запросов! ❌\n\n'
+        await message.answer('❌ У вас нет доступных запросов! ❌\n\n'
                              'Чтобы получить дополнительные запросы приведите друзей к нам!\n',
                              reply_markup=not_enough_requests_kb(data['message_id']))
         return None
+
+    await message.answer('Отлично, я получила твою ситуацию, уже связываюсь с высшими силами, чтобы помочь тебе!')
 
     spread = await create_spread()
     gifs = []  # Список для хранения GIF-анимаций карт
@@ -87,8 +87,7 @@ async def send_reading(message: Message, state: FSMContext):
 
 
 def not_enough_requests_kb(message_id) -> InlineKeyboardMarkup:
-    buttons = [[InlineKeyboardButton(text='Получить реферальную ссылку 💌', callback_data=f'user_referral_link')],
-               [InlineKeyboardButton(text='Скрыть этот расклад 👁', callback_data=f'delete_up_to_{message_id}')]]
+    buttons = [[InlineKeyboardButton(text='Получить реферальную ссылку 💌', callback_data=f'user_referral_link_{message_id}')]]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
@@ -97,13 +96,22 @@ def send_reading_kb(message_id) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-@router.callback_query(F.data == 'user_referral_link')
+@router.callback_query(F.data.startswith('user_referral_link_'))
 async def user_referral_link(callback: CallbackQuery):
+    # Извлекаем айди сообщения из калбэка для закрытия всего диалога
+    message_id = callback.data.split('_')[-1]
+    # Получаем из БД реф код и создаем на его основе реф ссылку
     referral_code = await get_referral_code_user(callback.from_user.id)
     referral_link = f'https://t.me/{config.name_bot}?start={referral_code}'
+
     await callback.answer()
-    await callback.message.answer('Вот ваша реферальная ссылка!\n'
+    await callback.message.edit_text('Вот ваша реферальная ссылка!\n'
                                   f'💌   <code>{referral_link}</code>   💌\n'
                                   '🔮 Скорее поделитесь ею с друзьями, чтобы получить бонусные запросы к нашим магам!',
-                                  reply_markup=universal_close_message_kb('🔙 Назад'),
+                                  reply_markup=user_referral_link_kb(message_id),
                                   parse_mode='HTML')
+
+
+def user_referral_link_kb(message_id) -> InlineKeyboardMarkup:
+    buttons = [[InlineKeyboardButton(text='Назад ⬅', callback_data=f'delete_up_to_{message_id}')]]
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
