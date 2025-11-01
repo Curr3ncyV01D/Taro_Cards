@@ -107,10 +107,10 @@ async def user_referral_link(callback: CallbackQuery):
 
     await callback.answer()
     await callback.message.edit_text('Вот ваша реферальная ссылка!\n'
-                                  f'💌   <code>{referral_link}</code>   💌\n'
-                                  '🔮 Скорее поделитесь ею с друзьями, чтобы получить бонусные запросы к нашим магам!',
-                                  reply_markup=user_referral_link_kb(message_id),
-                                  parse_mode='HTML')
+                                     f'💌   <code>{referral_link}</code>   💌\n'
+                                     '🔮 Скорее поделитесь ею с друзьями, чтобы получить бонусные запросы к нашим магам!',
+                                     reply_markup=user_referral_link_kb(message_id),
+                                     parse_mode='HTML')
 
 
 def user_referral_link_kb(message_id) -> InlineKeyboardMarkup:
