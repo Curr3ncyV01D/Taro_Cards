@@ -74,12 +74,10 @@ pip install -r requirements.txt
 **3. Запустите бота:**
     
 Запуск производится как модуль из корня проекта:
+`python -m bot.main`
 
-```Bash
-python -m bot.main
 📂 Структура проекта
-code
-Text
+```Bash
 .
 ├── bot/
 │   ├── database/       # Модели SQLAlchemy и функции запросов
@@ -91,3 +89,4 @@ Text
 ├── docker-compose.yml  # Оркестрация контейнеров
 ├── requirements.txt    # Зависимости
 └── .env.example        # Шаблон переменных окружения
+```
