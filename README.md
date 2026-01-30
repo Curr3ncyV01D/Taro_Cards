@@ -54,6 +54,7 @@ cd tarot-ai-bot
 Переименуйте `.env.example` в `.env` и укажите свои ключи:
 
 ~~~ Env
+BOT_NAME=ваш_бот_юзернейм
 BOT_TOKEN=ваш_токен_телеграм
 OPENAI_API_KEY=ваш_ключ_openai
 ~~~
