@@ -56,7 +56,7 @@ cd tarot-ai-bot
 ~~~ Env
 BOT_NAME=ваш_бот_юзернейм
 BOT_TOKEN=ваш_токен_телеграм
-OPENAI_API_KEY=ваш_ключ_openai
+API_TOKEN=ваш_ключ_openai
 ~~~
 **3. Запустите контейнер:**
 ```Bash
