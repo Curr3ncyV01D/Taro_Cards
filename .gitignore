@@ -1,0 +1,16 @@
+# IDE settings
+.idea/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables
+.env
+.venv/
+env/
+venv/
+
+# Database
+*.sqlite3
+*.db
