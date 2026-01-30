@@ -1,4 +1,4 @@
-from .general import router as general
-from .utils import router as utils
+from bot.handlers.general import router as general
+from bot.handlers.utils import router as utils
 
 routers = [general, utils]

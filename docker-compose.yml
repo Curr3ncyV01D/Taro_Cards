@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: tarot_bot
+    restart: always
+    environment:
+      # Говорим боту, что в докере файлы кладем в папку /app/data
+      - DB_FOLDER=/app/data
+      # Тут можно явно указать имя файла, если надо
+      - DB_NAME=tarot.db
+    env_file:
+      - .env
+    volumes:
+      # [Папка на вашем ПК] : [Папка внутри Докера]
+      # Файл базы физически будет лежать в папке storage/
+      - ./storage:/app/data

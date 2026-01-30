@@ -6,7 +6,7 @@ import re
 
 from openai import AsyncOpenAI, APIError, RateLimitError
 
-from config import config
+from bot.config import config
 
 client = AsyncOpenAI(api_key=config.token_api)
 

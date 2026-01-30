@@ -1,9 +1,9 @@
 from sqlalchemy import select, update
 
-# noinspection PyUnresolvedReferences
-from database.db_function import generate_unique_referral_code
-# noinspection PyUnresolvedReferences
-from database.models import async_session, User
+
+from bot.database.db_function import generate_unique_referral_code
+
+from bot.database.models import async_session, User
 
 
 async def set_user(user_data, referrer_id) -> None:

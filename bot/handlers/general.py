@@ -7,15 +7,15 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, \
     KeyboardButton
 
-# noinspection PyUnresolvedReferences
-from config import config
-# noinspection PyUnresolvedReferences
-from generator import create_response, create_spread, card_to_sticker
-# noinspection PyUnresolvedReferences
-from database.requests import set_user, get_count_requests_user, set_count_requests_user, get_count_referral_user, \
+
+from bot.config import config
+
+from bot.service.generator import create_response, create_spread, card_to_sticker
+
+from bot.database.requests import set_user, get_count_requests_user, set_count_requests_user, get_count_referral_user, \
     get_referral_code_user, get_referral_id_user
-# noinspection PyUnresolvedReferences
-from handlers.utils import universal_close_message_kb, process_referrer, get_referral_link_user, delete_messages_up_to
+
+from bot.handlers.utils import universal_close_message_kb, process_referrer, get_referral_link_user, delete_messages_up_to
 
 router = Router()
 

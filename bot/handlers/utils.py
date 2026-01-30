@@ -1,12 +1,12 @@
 from aiogram import Bot, F, Router
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
-# noinspection PyUnresolvedReferences
-from database.requests import (get_referral_id_user, get_count_referral_user, set_count_referral_user,
+
+from bot.database.requests import (get_referral_id_user, get_count_referral_user, set_count_referral_user,
                                get_count_requests_user, set_count_requests_user)
-# noinspection PyUnresolvedReferences
-from config import config
-# noinspection PyUnresolvedReferences
-from database.requests import get_referral_code_user
+
+from bot.config import config
+
+from bot.database.requests import get_referral_code_user
 
 router = Router()
 

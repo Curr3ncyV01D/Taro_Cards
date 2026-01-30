@@ -3,8 +3,8 @@ import string
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-# noinspection PyUnresolvedReferences
-from database.models import User
+
+from bot.database.models import User
 
 
 async def generate_unique_referral_code(session: AsyncSession, length=8, max_attempts=10):

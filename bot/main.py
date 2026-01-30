@@ -2,9 +2,9 @@ import asyncio
 import logging
 from aiogram import Bot, Dispatcher
 
-from database.models import async_main, engine
-from config import config
-from handlers import routers
+from bot.database.models import async_main, engine
+from bot.config import config
+from bot.handlers import routers
 
 # Настройка логирования
 logging.basicConfig(
